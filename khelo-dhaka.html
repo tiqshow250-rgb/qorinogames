@@ -1,0 +1,606 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Khelo Dhaka</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:#05060f;font-family:'Segoe UI',Arial,sans-serif;color:#fff;user-select:none}
+#bg{position:fixed;inset:0;z-index:0}
+.orb{position:fixed;border-radius:50%;filter:blur(80px);opacity:.35;pointer-events:none;z-index:0}
+.o1{width:400px;height:400px;background:#4cc9f0;top:5%;left:-100px}
+.o2{width:500px;height:500px;background:#a06cd5;top:40%;right:-150px}
+.o3{width:350px;height:350px;background:#ff3b3b;bottom:5%;left:35%;opacity:.2}
+
+/* ---------- AUTH SCREEN ---------- */
+#auth{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 30% 20%,#1a0a3a 0%,#05060f 60%);padding:20px}
+#auth.off{display:none}
+.abox{width:100%;max-width:420px;padding:36px 32px 28px;border-radius:24px;
+  background:linear-gradient(160deg,rgba(20,24,40,.98),rgba(10,12,24,.98));
+  border:1px solid rgba(76,201,240,.28);box-shadow:0 30px 80px rgba(0,0,0,.8);text-align:center}
+.abox .logo{width:72px;height:72px;margin:0 auto 16px;display:block}
+.abox h1{font-size:32px;font-weight:900;letter-spacing:4px;margin-bottom:4px;
+  background:linear-gradient(90deg,#4cc9f0,#a06cd5,#ffd166);-webkit-background-clip:text;background-clip:text;color:transparent}
+.abox .sub{font-size:11px;letter-spacing:5px;color:#7d8aa8;font-weight:700;text-transform:uppercase;margin-bottom:26px}
+.gbtn{width:100%;padding:14px;border-radius:12px;border:0;font-size:14px;font-weight:800;letter-spacing:.5px;
+  cursor:pointer;background:#fff;color:#1a1a1a;display:flex;align-items:center;justify-content:center;gap:10px;
+  transition:all .2s;margin-bottom:12px}
+.gbtn:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(255,255,255,.2)}
+.gbtn svg{width:20px;height:20px;flex-shrink:0}
+.divider{display:flex;align-items:center;gap:12px;margin:16px 0;color:#5a6a8a;font-size:11px;letter-spacing:2px}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.1)}
+.tabs{display:flex;gap:6px;margin-bottom:14px;background:rgba(255,255,255,.05);padding:5px;border-radius:12px}
+.tab{flex:1;padding:10px;border:0;border-radius:9px;background:transparent;color:#8fa4bb;font-weight:700;
+  font-size:13px;cursor:pointer;transition:.2s;font-family:inherit}
+.tab.active{background:linear-gradient(135deg,#4cc9f0,#06d6a0);color:#05060f}
+.ainp{width:100%;padding:14px 16px;margin-bottom:10px;border-radius:12px;border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.05);color:#fff;font-size:14px;outline:none;transition:.2s;font-family:inherit}
+.ainp:focus{border-color:#4cc9f0;background:rgba(76,201,240,.07)}
+.ainp::placeholder{color:#5a6a8a}
+.abtn{width:100%;padding:14px;border:0;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;
+  background:linear-gradient(135deg,#4cc9f0,#06d6a0);color:#05060f;letter-spacing:1px;transition:.2s;font-family:inherit}
+.abtn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(76,201,240,.4)}
+.abtn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.guestlink{margin-top:18px;font-size:13px;color:#7d8aa8}
+.guestlink a{color:#ffd166;cursor:pointer;font-weight:800;text-decoration:underline;text-decoration-style:dotted}
+.amsg{min-height:18px;font-size:12px;color:#ff6b6b;margin-top:8px;text-align:center}
+.amsg.ok{color:#06d6a0}
+
+/* ---------- HUB ---------- */
+#hub{position:relative;z-index:10;height:100%;overflow-y:auto}
+#hub.off{display:none}
+header{display:flex;align-items:center;justify-content:space-between;padding:20px 40px;position:relative}
+.brand{display:flex;align-items:center;gap:14px}
+.logo{width:56px;height:56px}
+.bt .l1{font-size:12px;letter-spacing:8px;color:#7fd8ff;font-weight:800}
+.bt .l2{font-size:26px;letter-spacing:4px;font-weight:900;
+  background:linear-gradient(90deg,#ffd166,#4cc9f0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hr{display:flex;gap:12px;align-items:center}
+.pill{padding:8px 16px;border-radius:20px;background:rgba(76,201,240,.1);
+  border:1px solid rgba(76,201,240,.35);font-family:'Courier New',monospace;font-weight:800;font-size:14px;color:#7fd8ff}
+.pill.gold{background:rgba(255,209,102,.1);border-color:rgba(255,209,102,.35);color:#ffd166}
+.userbtn{display:flex;align-items:center;gap:10px;padding:6px 14px 6px 6px;border-radius:24px;
+  background:rgba(76,201,240,.1);border:1px solid rgba(76,201,240,.3);cursor:pointer;transition:.2s;font-family:inherit}
+.userbtn:hover{background:rgba(76,201,240,.2)}
+.avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#4cc9f0,#06d6a0);
+  display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:#05060f}
+.uname{font-size:13px;font-weight:800;color:#fff;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dropdown{position:absolute;top:70px;right:40px;background:linear-gradient(160deg,rgba(20,24,40,.99),rgba(10,12,24,.99));
+  border:1px solid rgba(76,201,240,.3);border-radius:14px;padding:8px;min-width:200px;display:none;z-index:50;
+  box-shadow:0 20px 50px rgba(0,0,0,.7)}
+.dropdown.on{display:block}
+.dditem{display:block;width:100%;padding:11px 16px;background:transparent;border:0;border-radius:9px;
+  color:#c3d3e4;font-size:13px;font-weight:700;text-align:left;cursor:pointer;font-family:inherit;transition:.15s}
+.dditem:hover{background:rgba(76,201,240,.12);color:#fff}
+.dditem.logout{color:#ff8a8a}
+.dditem.logout:hover{background:rgba(255,107,107,.15);color:#ff6b6b}
+
+.hero{text-align:center;padding:20px 40px 40px}
+.hero h1{font-size:clamp(48px,7vw,88px);font-weight:900;letter-spacing:6px;line-height:1;
+  background:linear-gradient(90deg,#4cc9f0,#a06cd5,#ffd166,#ff3b3b,#4cc9f0);
+  background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:sh 8s linear infinite;margin-bottom:14px}
+@keyframes sh{100%{background-position:200% 50%}}
+.hero p{font-size:14px;letter-spacing:5px;color:#7d8aa8;font-weight:600;text-transform:uppercase}
+.hero p b{color:#4cc9f0}
+.stats{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;padding:0 40px 40px;max-width:1200px;margin:0 auto}
+.chip{flex:1;min-width:150px;max-width:220px;padding:16px 18px;border-radius:16px;
+  background:linear-gradient(160deg,rgba(20,24,40,.85),rgba(10,12,24,.85));
+  border:1px solid rgba(76,201,240,.2)}
+.chip .lbl{font-size:10px;letter-spacing:2px;color:#7d8aa8;font-weight:800;text-transform:uppercase;margin-bottom:6px}
+.chip .val{font-size:22px;font-weight:900;color:#fff}
+.chip .val.c{color:#4cc9f0}.chip .val.g{color:#ffd166}.chip .val.gr{color:#06d6a0}.chip .val.p{color:#ff3b3b}
+.games{max-width:1300px;margin:0 auto;padding:0 40px 80px}
+.sh2{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+.sh2 h2{font-size:15px;letter-spacing:4px;color:#7fd8ff;font-weight:800;text-transform:uppercase}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
+.card{position:relative;background:linear-gradient(160deg,rgba(20,24,40,.85),rgba(10,12,24,.9));
+  border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:20px 16px;cursor:pointer;transition:.35s;text-align:center}
+.card:hover{transform:translateY(-8px);border-color:var(--ac);box-shadow:0 24px 48px -12px var(--acg)}
+.card .ico{font-size:48px;line-height:1;margin-bottom:12px;display:block}
+.card h3{font-size:14px;font-weight:900;letter-spacing:1px;margin-bottom:5px}
+.card .sub{font-size:10px;letter-spacing:1px;color:#7d8aa8;font-weight:600;text-transform:uppercase}
+.card .badge{position:absolute;top:10px;right:10px;font-size:9px;font-weight:800;padding:3px 8px;border-radius:6px;background:var(--ac);color:#0a0a14}
+.card .empty{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);font-size:8px;color:#ff6b6b;font-weight:800;text-transform:uppercase}
+footer{text-align:center;padding:30px;font-size:11px;letter-spacing:2px;color:#5a6a8a;border-top:1px solid rgba(255,255,255,.05)}
+footer b{color:#4cc9f0;font-weight:800}
+#viewer{position:fixed;inset:0;z-index:100;background:#05060f;display:none}
+#viewer.on{display:block}
+#gameFrame{position:absolute;inset:0;width:100%;height:100%;border:0;background:#05060f}
+#backBtn{position:fixed;top:14px;left:14px;z-index:101;padding:10px 20px;border-radius:12px;
+  background:linear-gradient(135deg,#4cc9f0,#06d6a0);border:0;color:#05060f;font-size:13px;
+  font-weight:900;letter-spacing:2px;cursor:pointer;display:none;font-family:inherit}
+#backBtn.on{display:block}
+@media(max-width:1100px){.grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:800px){.grid{grid-template-columns:repeat(2,1fr)}.uname{display:none}}
+</style>
+</head>
+<body>
+
+<canvas id="bg"></canvas>
+<div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
+
+<!-- ============ AUTH SCREEN ============ -->
+<div id="auth">
+  <div class="abox">
+    <svg class="logo" viewBox="0 0 100 100">
+      <defs>
+        <linearGradient id="ag1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4cc9f0"/><stop offset="1" stop-color="#a06cd5"/></linearGradient>
+        <linearGradient id="ag2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffd166"/><stop offset="1" stop-color="#ff3b3b"/></linearGradient>
+        <linearGradient id="ag3" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#06d6a0"/><stop offset="1" stop-color="#4cc9f0"/></linearGradient>
+      </defs>
+      <polygon points="50,4 91,27 91,73 50,96 9,73 9,27" fill="none" stroke="url(#ag1)" stroke-width="2.5"/>
+      <polygon points="50,16 80,33 80,67 50,84 20,67 20,33" fill="url(#ag1)" opacity="0.12"/>
+      <g fill="url(#ag3)">
+        <rect x="28" y="34" width="6" height="32" rx="2"/>
+        <rect x="34" y="47" width="24" height="6" rx="2" transform="rotate(38 34 50)"/>
+        <rect x="34" y="47" width="24" height="6" rx="2" transform="rotate(-38 34 50)"/>
+      </g>
+      <circle cx="66" cy="40" r="3" fill="#ffd166"/>
+      <circle cx="76" cy="50" r="3" fill="#ff3b3b"/>
+      <circle cx="66" cy="60" r="3" fill="#06d6a0"/>
+      <ellipse cx="50" cy="50" rx="42" ry="14" fill="none" stroke="url(#ag2)" stroke-width="1.2" opacity="0.7" transform="rotate(-25 50 50)"/>
+    </svg>
+    <h1>KHELO DHAKA</h1>
+    <div class="sub">Sign in to play</div>
+
+    <button class="gbtn" id="gbtn">
+      <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.7 2.4 30.2 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.2C12.4 13.4 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.6c0-1.6-.1-3.2-.4-4.6H24v9.1h12.4c-.5 2.9-2.2 5.4-4.7 7l7.6 5.9c4.4-4.1 6.8-10.2 6.8-17.4z"/><path fill="#FBBC05" d="M10.5 28.6c-.5-1.4-.8-3-.8-4.6s.3-3.2.8-4.6l-7.9-6.2C1 16.2 0 20 0 24s1 7.8 2.6 10.8l7.9-6.2z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.6-5.9c-2.1 1.4-4.8 2.2-8.3 2.2-6.3 0-11.6-4.2-13.5-9.9l-7.9 6.2C6.5 42.6 14.6 48 24 48z"/></svg>
+      Continue with Google
+    </button>
+
+    <div class="divider">OR</div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="login">Log In</button>
+      <button class="tab" data-tab="signup">Sign Up</button>
+    </div>
+
+    <input class="ainp" id="inUser" placeholder="Username" maxlength="16" autocomplete="off">
+    <input class="ainp" id="inPass" type="password" placeholder="Password" maxlength="32" autocomplete="off">
+
+    <button class="abtn" id="btnAuth">LOG IN</button>
+    <div class="amsg" id="authMsg"></div>
+    <div class="guestlink">or <a id="guestBtn">Continue as Guest</a></div>
+  </div>
+</div>
+
+<!-- ============ HUB ============ -->
+<div id="hub" class="off">
+  <header>
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 100 100">
+        <defs>
+          <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4cc9f0"/><stop offset="1" stop-color="#a06cd5"/></linearGradient>
+          <linearGradient id="g2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffd166"/><stop offset="1" stop-color="#ff3b3b"/></linearGradient>
+          <linearGradient id="g3" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#06d6a0"/><stop offset="1" stop-color="#4cc9f0"/></linearGradient>
+        </defs>
+        <polygon points="50,4 91,27 91,73 50,96 9,73 9,27" fill="none" stroke="url(#g1)" stroke-width="2.5"/>
+        <polygon points="50,16 80,33 80,67 50,84 20,67 20,33" fill="url(#g1)" opacity="0.12"/>
+        <g fill="url(#g3)">
+          <rect x="28" y="34" width="6" height="32" rx="2"/>
+          <rect x="34" y="47" width="24" height="6" rx="2" transform="rotate(38 34 50)"/>
+          <rect x="34" y="47" width="24" height="6" rx="2" transform="rotate(-38 34 50)"/>
+        </g>
+        <circle cx="66" cy="40" r="3" fill="#ffd166"/>
+        <circle cx="76" cy="50" r="3" fill="#ff3b3b"/>
+        <circle cx="66" cy="60" r="3" fill="#06d6a0"/>
+        <ellipse cx="50" cy="50" rx="42" ry="14" fill="none" stroke="url(#g2)" stroke-width="1.2" opacity="0.7" transform="rotate(-25 50 50)"/>
+      </svg>
+      <div class="bt"><div class="l1">KHELO</div><div class="l2">DHAKA</div></div>
+    </div>
+    <div class="hr">
+      <div class="pill gold" id="pCoins">0</div>
+      <div class="userbtn" id="userBtn">
+        <div class="avatar" id="avatar">G</div>
+        <div class="uname" id="unameLbl">Guest</div>
+        <div style="font-size:11px;color:#7d8aa8">▼</div>
+      </div>
+    </div>
+    <div class="dropdown" id="dropdown">
+      <button class="dditem" id="ddProfile">👤  Profile</button>
+      <button class="dditem" id="ddSwitch">🔄  Switch Account</button>
+      <button class="dditem logout" id="ddLogout">🚪  Log Out</button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h1>KHELO DHAKA</h1>
+    <p>One Platform · <b>9 Sports</b> · Endless Glory</p>
+  </section>
+
+  <section class="stats">
+    <div class="chip"><div class="lbl">Total Wins</div><div class="val gr" id="sW">0</div></div>
+    <div class="chip"><div class="lbl">Games Played</div><div class="val c" id="sP">0</div></div>
+    <div class="chip"><div class="lbl">Trophies</div><div class="val g" id="sT">🏆 0</div></div>
+    <div class="chip"><div class="lbl">Sports Unlocked</div><div class="val p" id="sS">0 / 9</div></div>
+  </section>
+
+  <section class="games">
+    <div class="sh2"><h2>Choose Your Sport</h2></div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <footer>Made with ⚡ for <b>Bangladesh</b> · Khelo Dhaka</footer>
+</div>
+
+<div id="viewer">
+  <iframe id="gameFrame"></iframe>
+  <button id="backBtn">← BACK TO HUB</button>
+</div>
+
+<template id="game-tennis"></template>
+<template id="game-pingpong"></template>
+<template id="game-basketball"></template>
+<template id="game-boxing"></template>
+<template id="game-runner"></template>
+<template id="game-swimming"></template>
+<template id="game-hockey"></template>
+<template id="game-derby"></template>
+<template id="game-volleyball"></template>
+
+<script>
+/* ============================================================
+   KHELO DHAKA — Auth + Hub
+   ============================================================ */
+
+/* ---------- Game registry ---------- */
+var GAMES = [
+  {id:'tennis',     name:'Dhaka Tennis',    sub:'Back-View Tennis',  icon:'🎾', accent:'#d4ff50'},
+  {id:'pingpong',   name:'Dhaka Ping Pong', sub:'Table Tennis',      icon:'🏓', accent:'#ff9f1c'},
+  {id:'basketball', name:'Dhaka Hoops',     sub:'Touch Basketball',  icon:'🏀', accent:'#ff7a1a'},
+  {id:'boxing',     name:'Dhaka Boxing',    sub:'UFC Combat',        icon:'🥊', accent:'#ff3b3b'},
+  {id:'runner',     name:'Dhaka Dour',      sub:'Urban Runner',      icon:'🏃‍♀️', accent:'#06d6a0'},
+  {id:'swimming',   name:'Dhaka Saan',      sub:'River Swimming',    icon:'🏊', accent:'#4cc9f0'},
+  {id:'hockey',     name:'Dhaka Hockey',    sub:'Field Championship',icon:'🏑', accent:'#8cdc8c'},
+  {id:'derby',      name:'Dhaka Derby',     sub:'Horse Racing',      icon:'🐎', accent:'#e8c878'},
+  {id:'volleyball', name:'Dhaka Volley',    sub:'Pro Volleyball',    icon:'🏐', accent:'#ffd166'}
+];
+
+/* Game local-storage keys used by each game to save its own progress */
+var GAME_KEYS = [
+  'dhakaTennis.guest.v1',
+  'dhakaPingPongPro.guest.v1',
+  'dhakaHoops.guest.v1',
+  'dhakaBoxingUFC.guest.v1',
+  'dhakaDour.guest.v3',
+  'dhakaSaan.guest.v1',
+  'dhakaHockey2.guest',
+  'dhakaDerbyX.guest.v1',
+  'dhakaVolleyPro.guest.v1'
+];
+
+/* ---------- Storage (safe on old browsers) ---------- */
+var LS = (function(){
+  try { var t='__k__'; localStorage.setItem(t,'1'); localStorage.removeItem(t); return localStorage; }
+  catch(e){
+    var m={};
+    return { getItem:function(k){return m[k]===undefined?null:m[k];},
+             setItem:function(k,v){m[k]=String(v);},
+             removeItem:function(k){delete m[k];} };
+  }
+})();
+
+/* ---------- Account storage ---------- */
+var USERS_KEY   = 'kheloDhaka.users.v1';
+var CURRENT_KEY = 'kheloDhaka.currentUser.v1';
+
+function loadUsers(){
+  try { return JSON.parse(LS.getItem(USERS_KEY) || '{}'); } catch(e){ return {}; }
+}
+function saveUsers(u){ try { LS.setItem(USERS_KEY, JSON.stringify(u)); } catch(e){} }
+
+function hashPw(s){
+  var h=5381;
+  for (var i=0;i<s.length;i++) h = ((h<<5)+h+s.charCodeAt(i))>>>0;
+  return 'k'+h.toString(36);
+}
+
+/* ---------- Progress swap ---------- */
+/* Snapshot current game data into account.progress */
+function snapshotProgress(account){
+  var p = {};
+  for (var i=0;i<GAME_KEYS.length;i++){
+    var v = LS.getItem(GAME_KEYS[i]);
+    if (v !== null) p[GAME_KEYS[i]] = v;
+  }
+  account.progress = p;
+}
+
+/* Load account.progress back into game keys (clears any previous data) */
+function loadProgress(account){
+  for (var i=0;i<GAME_KEYS.length;i++) LS.removeItem(GAME_KEYS[i]);
+  if (account.progress){
+    for (var k in account.progress){
+      if (account.progress.hasOwnProperty(k)) LS.setItem(k, account.progress[k]);
+    }
+  }
+}
+
+/* ============================================================
+   AUTH UI
+   ============================================================ */
+var authMode = 'login';
+var users = loadUsers();
+var currentUser = null;   /* account object or null for guest */
+
+var elUser = document.getElementById('inUser');
+var elPass = document.getElementById('inPass');
+var elMsg  = document.getElementById('authMsg');
+var elAuthBtn = document.getElementById('btnAuth');
+
+/* Tab switching */
+var tabs = document.querySelectorAll('.tab');
+for (var i=0;i<tabs.length;i++){
+  (function(tab){
+    tab.onclick = function(){
+      authMode = tab.getAttribute('data-tab');
+      for (var j=0;j<tabs.length;j++) tabs[j].classList.toggle('active', tabs[j]===tab);
+      elAuthBtn.textContent = authMode === 'login' ? 'LOG IN' : 'CREATE ACCOUNT';
+      elMsg.textContent = ''; elMsg.className = 'amsg';
+    };
+  })(tabs[i]);
+}
+
+/* Login / Sign up */
+elAuthBtn.onclick = function(){
+  var name = elUser.value.trim();
+  var pw = elPass.value;
+
+  if (authMode === 'signup'){
+    if (name.length < 3){ showMsg('Username must be 3+ characters', false); return; }
+    if (pw.length < 4){ showMsg('Password must be 4+ characters', false); return; }
+    if (users[name]){ showMsg('Username already taken', false); return; }
+    users[name] = {
+      name: name,
+      pw: hashPw(pw),
+      created: Date.now(),
+      progress: {}
+    };
+    saveUsers(users);
+    currentUser = users[name];
+    LS.setItem(CURRENT_KEY, name);
+    loginSuccess();
+  } else {
+    var u = users[name];
+    if (!u){ showMsg('No account with that username', false); return; }
+    if (u.pw !== hashPw(pw)){ showMsg('Wrong password', false); return; }
+    currentUser = u;
+    LS.setItem(CURRENT_KEY, name);
+    loginSuccess();
+  }
+};
+
+/* Guest */
+document.getElementById('guestBtn').onclick = function(){
+  currentUser = null;
+  LS.removeItem(CURRENT_KEY);
+  /* Clear game progress for guest */
+  for (var i=0;i<GAME_KEYS.length;i++) LS.removeItem(GAME_KEYS[i]);
+  loginSuccess();
+};
+
+/* Google Sign-In — only works when hosted on http/https, NOT file:// */
+document.getElementById('gbtn').onclick = function(){
+  if (location.protocol === 'file:'){
+    alert(
+      'Google Sign-In requires the app to be online.\n\n' +
+      'Your file is running from your PC (file://), so Google blocks it.\n\n' +
+      'Options:\n' +
+      '1. Use "Continue as Guest" or create a local account now.\n' +
+      '2. To enable real Google login: upload KHELO-DHAKA-COMPLETE.html to Netlify (free), then add your Client ID.\n\n' +
+      'Everything else works perfectly offline.'
+    );
+    return;
+  }
+  alert('Google Sign-In: to enable this, you need to set up a Google OAuth Client ID. See the Khelo Dhaka guide.');
+};
+
+function showMsg(txt, ok){
+  elMsg.textContent = txt;
+  elMsg.className = 'amsg' + (ok ? ' ok' : '');
+}
+
+function loginSuccess(){
+  document.getElementById('auth').classList.add('off');
+  document.getElementById('hub').classList.remove('off');
+  updateProfileBadge();
+  buildGrid();
+  updateStats();
+}
+
+/* ============================================================
+   PROFILE UI
+   ============================================================ */
+function updateProfileBadge(){
+  var name = currentUser ? currentUser.name : 'Guest';
+  document.getElementById('unameLbl').textContent = name;
+  document.getElementById('avatar').textContent = (name.charAt(0) || 'G').toUpperCase();
+}
+
+/* Dropdown menu */
+var dd = document.getElementById('dropdown');
+document.getElementById('userBtn').onclick = function(e){
+  e.stopPropagation();
+  dd.classList.toggle('on');
+};
+document.addEventListener('click', function(){ dd.classList.remove('on'); });
+dd.onclick = function(e){ e.stopPropagation(); };
+
+document.getElementById('ddProfile').onclick = function(){
+  dd.classList.remove('on');
+  if (!currentUser){
+    alert('You are playing as Guest.\n\nSign up to save your progress.');
+    return;
+  }
+  alert('Account: ' + currentUser.name +
+        '\nCreated: ' + new Date(currentUser.created).toLocaleString() +
+        '\n\nGames Played: ' + (currentUser.progress ? Object.keys(currentUser.progress).length : 0));
+};
+
+document.getElementById('ddSwitch').onclick = function(){
+  dd.classList.remove('on');
+  if (currentUser){
+    snapshotProgress(currentUser);
+    saveUsers(users);
+  }
+  document.getElementById('hub').classList.add('off');
+  document.getElementById('auth').classList.remove('off');
+  elUser.value = ''; elPass.value = '';
+  elMsg.textContent = '';
+  currentUser = null;
+};
+
+document.getElementById('ddLogout').onclick = function(){
+  dd.classList.remove('on');
+  if (currentUser){
+    snapshotProgress(currentUser);
+    saveUsers(users);
+  }
+  for (var i=0;i<GAME_KEYS.length;i++) LS.removeItem(GAME_KEYS[i]);
+  LS.removeItem(CURRENT_KEY);
+  document.getElementById('hub').classList.add('off');
+  document.getElementById('auth').classList.remove('off');
+  elUser.value = ''; elPass.value = '';
+  elMsg.textContent = '';
+  currentUser = null;
+};
+
+/* ============================================================
+   HUB GRID + STATS
+   ============================================================ */
+function hexA(h,a){h=h.replace('#','');if(h.length===3)h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];var n=parseInt(h,16);return'rgba('+((n>>16)&255)+','+((n>>8)&255)+','+(n&255)+','+a+')'}
+function readStats(k){try{var r=LS.getItem(k);return r?JSON.parse(r):null}catch(e){return null}}
+function hasGame(id){var t=document.getElementById('game-'+id);if(!t)return false;return t.innerHTML.trim().length>100}
+
+function buildGrid(){
+  var g=document.getElementById('grid');
+  g.innerHTML='';
+  for (var i=0;i<GAMES.length;i++){
+    (function(gm){
+      var played = !!readStats(gm.key || ('dhaka'+gm.id+'.guest'));
+      var ready = hasGame(gm.id);
+      var card = document.createElement('div');
+      card.className = 'card';
+      card.style.setProperty('--ac', gm.accent);
+      card.style.setProperty('--acg', hexA(gm.accent, 0.35));
+      card.innerHTML =
+        (played ? '<div class="badge">PLAYED</div>' : '') +
+        '<span class="ico">' + gm.icon + '</span>' +
+        '<h3>' + gm.name + '</h3>' +
+        '<div class="sub">' + gm.sub + '</div>' +
+        (ready ? '' : '<div class="empty">NOT READY</div>');
+      card.onclick = function(){ launch(gm); };
+      g.appendChild(card);
+    })(GAMES[i]);
+  }
+}
+
+function updateStats(){
+  var w=0, p=0, t=0, u=0, coins=0;
+  for (var i=0;i<GAME_KEYS.length;i++){
+    var s = readStats(GAME_KEYS[i]);
+    if (s){
+      u++;
+      w += (s.wins || 0);
+      p += (s.matches || s.races || s.games || 0);
+      t += (s.trophies || s.belts || s.titles || 0);
+      coins += (s.coins || 0);
+    }
+  }
+  document.getElementById('sW').textContent = w;
+  document.getElementById('sP').textContent = p;
+  document.getElementById('sT').textContent = '🏆 ' + t;
+  document.getElementById('sS').textContent = u + ' / 9';
+  document.getElementById('pCoins').textContent = Math.floor(coins);
+}
+
+/* ============================================================
+   LAUNCH GAME
+   ============================================================ */
+function launch(gm){
+  if (!hasGame(gm.id)){ alert(gm.name + ' is not embedded. Run merge.bat.'); return; }
+  var t = document.getElementById('game-' + gm.id);
+  document.getElementById('gameFrame').srcdoc = t.innerHTML;
+  document.getElementById('viewer').classList.add('on');
+  document.getElementById('backBtn').classList.add('on');
+}
+function closeGame(){
+  document.getElementById('gameFrame').srcdoc = '';
+  document.getElementById('viewer').classList.remove('on');
+  document.getElementById('backBtn').classList.remove('on');
+  setTimeout(function(){
+    if (currentUser){
+      snapshotProgress(currentUser);
+      saveUsers(users);
+    }
+    updateStats();
+    buildGrid();
+  }, 300);
+}
+document.getElementById('backBtn').onclick = closeGame;
+
+/* ============================================================
+   AUTO-LOGIN ON START
+   ============================================================ */
+(function auto(){
+  var s = LS.getItem(CURRENT_KEY);
+  if (s && users[s]){
+    currentUser = users[s];
+    loadProgress(currentUser);
+    loginSuccess();
+  }
+})();
+
+/* ============================================================
+   BACKGROUND PARTICLES
+   ============================================================ */
+var bg = document.getElementById('bg');
+var bx = bg.getContext('2d');
+function szBg(){ bg.width = innerWidth; bg.height = innerHeight; }
+addEventListener('resize', szBg); szBg();
+var parts = [];
+for (var i=0;i<65;i++){
+  parts.push({
+    x: Math.random()*bg.width, y: Math.random()*bg.height,
+    vx: (Math.random()-0.5)*0.35, vy: (Math.random()-0.5)*0.35,
+    r: 1 + Math.random()*2,
+    c: ['#4cc9f0','#a06cd5','#ffd166','#06d6a0'][Math.floor(Math.random()*4)]
+  });
+}
+function drawBg(){
+  bx.clearRect(0,0,bg.width,bg.height);
+  var md = 140;
+  for (var i=0;i<parts.length;i++){
+    for (var j=i+1;j<parts.length;j++){
+      var dx = parts[i].x - parts[j].x, dy = parts[i].y - parts[j].y;
+      var d = Math.sqrt(dx*dx + dy*dy);
+      if (d < md){
+        bx.strokeStyle = 'rgba(76,201,240,' + ((1 - d/md)*0.18) + ')';
+        bx.lineWidth = 1;
+        bx.beginPath();
+        bx.moveTo(parts[i].x, parts[i].y);
+        bx.lineTo(parts[j].x, parts[j].y);
+        bx.stroke();
+      }
+    }
+  }
+  for (var k=0;k<parts.length;k++){
+    var pp = parts[k];
+    pp.x += pp.vx; pp.y += pp.vy;
+    if (pp.x<0) pp.x = bg.width;
+    if (pp.x>bg.width) pp.x = 0;
+    if (pp.y<0) pp.y = bg.height;
+    if (pp.y>bg.height) pp.y = 0;
+    bx.fillStyle = pp.c; bx.shadowColor = pp.c; bx.shadowBlur = 8;
+    bx.beginPath(); bx.arc(pp.x, pp.y, pp.r, 0, Math.PI*2); bx.fill();
+  }
+  bx.shadowBlur = 0;
+  requestAnimationFrame(drawBg);
+}
+drawBg();
+</script>
+</body>
+</html>
